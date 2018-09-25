@@ -13,3 +13,4 @@ Some extensions that might come in the future:
   and amount of mines does not need to be compiled
 * Modes with different rules
 * Hotkeys or something similar to improve controls
+* Colors for various numbers
