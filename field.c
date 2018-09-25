@@ -44,7 +44,7 @@ int is_mine(int i, int j) {
   return hfield[i][j] == '*';
 }
 
-void init_hfield() {
+void init_hfield(int row, int column) {
   // Make every point empty
   for(int i=0; i<FIELD_SIZE; i++) {
     for(int j=0; j<FIELD_SIZE; j++) {
@@ -55,13 +55,12 @@ void init_hfield() {
   // Randomly put mines
   time_t t;
   srand((unsigned) time(&t));
-  for(int i=0; i < MINE_COUNT; i++) {
+  for(int i=0; i < MINE_COUNT;) {
     int x = rand() % FIELD_SIZE;
     int y = rand() % FIELD_SIZE;
-    if(hfield[x][y] == '*') {
-      i--;
-    } else {
+    if(hfield[x][y] != '*' && !(x == row && y == column)) {
       hfield[x][y] = '*';
+      i++;
     }
   }
 

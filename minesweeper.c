@@ -4,33 +4,35 @@
 #include "minesweeper.h"
 #include "field.h"
 
-void get_coordinates(int* row, int* column) {
+int get_coordinates(int* row, int* column) {
   printf("Row: ");
   scanf("%d", row);
   printf("Column: ");
   scanf("%d", column);
+  
+  if(*row < 1 || *row > FIELD_SIZE ||
+     *column < 1 || *column > FIELD_SIZE)
+    return 0;
+  return 1;
 }
 
 void play() {
   int mines_left = MINE_COUNT;
   while(1) {
     int row, column;
-    printf("\e[1;1H\e[2J");
-    printf("Mines left: %d\n\n", mines_left);
-    print_vfield();
-    printf("Reveal a field (1) or mark a mine (2): ");
     char mode;
+
+    print_board(mines_left);
+    printf("Reveal a field (1) or mark a mine (2): ");
     scanf("%c", &mode);
     switch(mode) {
-
     case '1': // Reveal point
-      get_coordinates(&row, &column);
-      if(row < 1 || row > FIELD_SIZE ||
-	 column < 1 || column > FIELD_SIZE)
+      if(!get_coordinates(&row, &column))
 	continue;
       if(reveal_point(row-1, column-1)) {
+	printf("\n");
 	print_vfield();
-	printf("You lost the game\n");
+	printf("\nYou lost the game\n");
 	return;
       }
       if(REVEALED_POINTS == (FIELD_SIZE * FIELD_SIZE) - MINE_COUNT) {
@@ -42,9 +44,7 @@ void play() {
       break;
 
     case '2': // Mark mine
-      get_coordinates(&row, &column);
-      if(row < 1 || row > FIELD_SIZE ||
-	 column < 1 || column > FIELD_SIZE)
+      if(!get_coordinates(&row, &column))
 	continue;
       int status = mark_mine(row-1, column-1);
       if(status == 1) {
@@ -62,9 +62,20 @@ void play() {
 
 
 int main() {
-  init_hfield();
+  int row, column;
   init_vfield();
-  REVEALED_POINTS = 0;
+  do {
+    print_board(MINE_COUNT);
+    printf("Reveal a field\n");
+  } while(!get_coordinates(&row, &column));
+  init_hfield(row, column);
+  reveal_point(row-1, column-1);
   play();
   return 0;
+}
+
+void print_board(int mines_left) {
+  printf("\e[1;1H\e[2J");
+  printf("Mines left: %d\n\n", mines_left);
+  print_vfield();
 }

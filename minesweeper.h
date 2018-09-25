@@ -4,6 +4,7 @@
 #define FIELD_SIZE 8
 #define MINE_COUNT 12
 
-void init();
+void play();
+void print_board();
 
 #endif

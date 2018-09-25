@@ -7,10 +7,3 @@ need to be allocated dynamically.
 
 The game expects to be executed in a UNIX environment, otherwise the clear
 screen function will probably not work.
-
-Please note, that the first point you reveal may be a mine, which is unfair.
-The game could also generate situations, in which guessing is the only way
-to win the game, even if all but two points are already revealed. Compared to
-the original Minesweeper, this version doesn't have time tracking and high
-scores.
-
