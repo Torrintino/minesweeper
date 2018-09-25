@@ -33,9 +33,4 @@ int is_mine(int i, int j);
 void mark_mine(int i, int j);
 int reveal_point(int i, int j);
 
-// rand creates a random numver
-// rand_mine translates such a number into a valid coordinate
-int rand();
-int rand_mine();
-
 #endif

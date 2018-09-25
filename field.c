@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include "field.h"
 
 void init_vfield() {
@@ -51,9 +53,11 @@ void init_hfield() {
   }
 
   // Randomly put mines
+  time_t t;
+  srand((unsigned) time(&t));
   for(int i=0; i < MINE_COUNT; i++) {
-    int x = rand_mine();
-    int y = rand_mine();
+    int x = rand() % FIELD_SIZE;
+    int y = rand() % FIELD_SIZE;
     if(hfield[x][y] == '*') {
       i--;
     } else {
@@ -126,22 +130,6 @@ void print_hfield() {
     }
     printf("\n");
   }
-}
-
-
-int seed = 123456789;
-int rand() {
-  seed = (1103515245 * seed + 12345) % 2147483648;
-  return seed;
-}
-
-int rand_mine() {
-  double x = rand();
-  if(x < 0)
-    x = -x;
-  x /= 2147483648;
-  x *= FIELD_SIZE;
-  return x;
 }
 
 int get_column(int i) {
