@@ -30,7 +30,7 @@ void print_vfield();
 void init_hfield();
 
 int is_mine(int i, int j);
-void mark_mine(int i, int j);
+int mark_mine(int i, int j);
 int reveal_point(int i, int j);
 
 #endif

@@ -168,14 +168,15 @@ int reveal_point(int i, int j) {
   return hfield[i][j] == '*';
 }
 
-void mark_mine(int i, int j) {
+int mark_mine(int i, int j) {
   int r = get_row(i), c = get_column(j);
   if(vfield[r][c] == '*') {
     vfield[r][c] = '-';
-    return;
+    return 0;
   }
   
   if(vfield[r][c] != '-')
-    return;
+    return -1;
   vfield[r][c] = '*';
+  return 1;
 }

@@ -12,15 +12,18 @@ void get_coordinates(int* row, int* column) {
 }
 
 void play() {
+  int mines_left = MINE_COUNT;
   while(1) {
     int row, column;
     printf("\e[1;1H\e[2J");
+    printf("Mines left: %d\n\n", mines_left);
     print_vfield();
     printf("Reveal a field (1) or mark a mine (2): ");
     char mode;
     scanf("%c", &mode);
     switch(mode) {
-    case '1':
+
+    case '1': // Reveal point
       get_coordinates(&row, &column);
       if(row < 1 || row > FIELD_SIZE ||
 	 column < 1 || column > FIELD_SIZE)
@@ -31,19 +34,27 @@ void play() {
 	return;
       }
       if(REVEALED_POINTS == (FIELD_SIZE * FIELD_SIZE) - MINE_COUNT) {
+	printf("\n");
 	print_vfield();
-	printf("You won the game\n");
+	printf("\nYou won the game\n");
 	return;
       }
       break;
-    case '2':
+
+    case '2': // Mark mine
       get_coordinates(&row, &column);
       if(row < 1 || row > FIELD_SIZE ||
 	 column < 1 || column > FIELD_SIZE)
 	continue;
-      mark_mine(row-1, column-1);
+      int status = mark_mine(row-1, column-1);
+      if(status == 1) {
+	mines_left--;
+      } else if(!status) {
+	mines_left++;
+      }
       break;
-    default:
+
+    default: // Invalid input
       continue;
     }
   }
