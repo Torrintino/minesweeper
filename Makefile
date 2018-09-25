@@ -8,7 +8,7 @@ minesweeper: $(SOURCE)
 	$(CC) $(CFLAGS) $(SOURCE) -o $@
 
 clean:
-	rm -rf *.o
+	rm -rf *.o minesweeper
 
 run: minesweeper
 	./minesweeper
