@@ -68,7 +68,7 @@ int main() {
     print_board(MINE_COUNT);
     printf("Reveal a field\n");
   } while(!get_coordinates(&row, &column));
-  init_hfield(row, column);
+  init_hfield(row-1, column-1);
   reveal_point(row-1, column-1);
   play();
   return 0;
