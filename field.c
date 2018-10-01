@@ -150,6 +150,9 @@ int init_hfield(int row, int column) {
 	if(is_mine(i+1, j+1))
 	  hfield[i][j]++;
       }
+
+      if(hfield[i][j] == '0')
+	hfield[i][j] = ' ';
     }
   }
 
@@ -180,7 +183,7 @@ int reveal_point(int i, int j) {
   REVEALED_POINTS++;
   vfield[get_row(i)][get_column(j)] = hfield[i][j];
   // Recursively 
-  if(hfield[i][j] == '0') {
+  if(hfield[i][j] == ' ') {
     // top left
     if(i != 0 && j != 0) reveal_point(i-1, j-1);
     // top
