@@ -7,8 +7,11 @@ all: minesweeper
 minesweeper: $(SOURCE)
 	$(CC) $(CFLAGS) $(SOURCE) -o $@
 
+debug: $(SOURCE)
+	$(CC) $(CFLAGS) -ggdb -static $(SOURCE) -o $@
+
 clean:
-	rm -rf *.o minesweeper
+	rm -rf *.o minesweeper debug
 
 run: minesweeper
 	./minesweeper

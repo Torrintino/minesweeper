@@ -3,36 +3,61 @@
 #include <time.h>
 #include "field.h"
 
-void init_vfield() {
+
+void set_size(int rows, int columns, int mine_count) {
+  ROWS = rows;
+  COLS = columns;
+  MINE_COUNT = mine_count;
+  
+  // The first rows displays coordinates, the second is a separator
+  VFIELD_ROWS = rows + 2;
+  
+  // Before each point is one whitespace
+  // The first column contains coordinates
+  // The second column is a separator
+  // The last column contains \0 terminators for each line
+  VFIELD_COLS = 2 * columns + 3;
+}
+
+int init_vfield() {
+  vfield = malloc(sizeof(char*) * VFIELD_ROWS);
+  if(vfield == NULL) return 0;
+  for(int i=0; i<VFIELD_ROWS; i++) {
+    vfield[i] = malloc(sizeof(char) * VFIELD_COLS);
+    if(vfield[i] == NULL) return 0;
+  }
+  
   vfield[0][0] = ' ';
   vfield[0][1] = ' ';
 
   // Set first row with coordinates
-  for(int i=2; i<VFIELD_COLUMNS-2; i+=2) {
+  for(int i=2; i<VFIELD_COLS-2; i+=2) {
     vfield[0][i] = ' ';
-    vfield[0][i+1] = '0' + ((i - 1) / 2) + 1;
+    vfield[0][i+1] = '0' + (((i - 1) / 2) + 1) % 10;
   }
 
   // Set second row to blank
-  for(int i=0; i<VFIELD_COLUMNS-1; i++)
+  for(int i=0; i<VFIELD_COLS-1; i++)
     vfield[1][i] = '_';
 
   // Other rows
   for(int i=2;i<VFIELD_ROWS;i++) {
     // Set first two columns to coordinates
-    vfield[i][0] = '0' + (i - 1);
+    vfield[i][0] = '0' + ((i - 1)) % 10;
     vfield[i][1] = '|';
 
     // Set other columns with blanks and place holders
-    for(int j=2;j<VFIELD_COLUMNS-2; j+=2) {
+    for(int j=2;j<VFIELD_COLS-2; j+=2) {
       vfield[i][j] = ' ';
       vfield[i][j+1] = '-';
     }
 
     // Set null byte for each line
     for(int i=0; i<VFIELD_ROWS; i++)
-      vfield[i][VFIELD_COLUMNS - 1] = '\0';
+      vfield[i][VFIELD_COLS - 1] = '\0';
   }
+
+  return 1;
 }
 
 void print_vfield() {
@@ -44,10 +69,17 @@ int is_mine(int i, int j) {
   return hfield[i][j] == '*';
 }
 
-void init_hfield(int row, int column) {
+int init_hfield(int row, int column) {
+  hfield = malloc(sizeof(char*) * ROWS);
+  if(hfield == NULL) return 0;
+  for(int i=0; i<ROWS; i++) {
+    hfield[i] = malloc(sizeof(char) * COLS);
+    if(hfield == NULL) return 0;
+  }
+  
   // Make every point empty
-  for(int i=0; i<FIELD_SIZE; i++) {
-    for(int j=0; j<FIELD_SIZE; j++) {
+  for(int i=0; i<ROWS; i++) {
+    for(int j=0; j<COLS; j++) {
       hfield[i][j] = ' ';
     }
   }
@@ -56,8 +88,8 @@ void init_hfield(int row, int column) {
   time_t t;
   srand((unsigned) time(&t));
   for(int i=0; i < MINE_COUNT;) {
-    int x = rand() % FIELD_SIZE;
-    int y = rand() % FIELD_SIZE;
+    int x = rand() % ROWS;
+    int y = rand() % COLS;
     if(hfield[x][y] != '*' && !(x == row && y == column)) {
       hfield[x][y] = '*';
       i++;
@@ -65,8 +97,8 @@ void init_hfield(int row, int column) {
   }
 
   // Calculate point numbers
-  for(int i=0; i<FIELD_SIZE; i++) {
-    for(int j=0; j<FIELD_SIZE; j++) {
+  for(int i=0; i<ROWS; i++) {
+    for(int j=0; j<COLS; j++) {
       if(hfield[i][j] == '*')
 	continue;
       hfield[i][j] = '0';
@@ -84,7 +116,7 @@ void init_hfield(int row, int column) {
       }
 
       // top right
-      if(i != 0 && j != FIELD_SIZE-1) {
+      if(i != 0 && j != COLS-1) {
 	if(is_mine(i-1, j+1))
 	  hfield[i][j]++;
       }
@@ -96,35 +128,37 @@ void init_hfield(int row, int column) {
       }
 
       // right
-      if(j != FIELD_SIZE-1) {
+      if(j != COLS-1) {
 	if(is_mine(i, j+1))
 	  hfield[i][j]++;
       }
 
       // bottom left
-      if(i != FIELD_SIZE-1 && j != 0) {
+      if(i != ROWS-1 && j != 0) {
 	if(is_mine(i+1, j-1))
 	  hfield[i][j]++;
       }
 
       // bottom
-      if(i != FIELD_SIZE-1) {
+      if(i != ROWS-1) {
 	if(is_mine(i+1, j))
 	  hfield[i][j]++;
       }
 
       // bottom right
-      if(i != FIELD_SIZE-1 && j != FIELD_SIZE-1) {
+      if(i != ROWS-1 && j != COLS-1) {
 	if(is_mine(i+1, j+1))
 	  hfield[i][j]++;
       }
     }
   }
+
+  return 1;
 }
 
 void print_hfield() {
-  for(int i=0; i<FIELD_SIZE; i++) {
-    for(int j=0; j<FIELD_SIZE; j++) {
+  for(int i=0; i<ROWS; i++) {
+    for(int j=0; j<COLS; j++) {
       printf("%c ", hfield[i][j]);
     }
     printf("\n");
@@ -152,17 +186,17 @@ int reveal_point(int i, int j) {
     // top
     if(i != 0) reveal_point(i-1, j);
     // top right
-    if(i != 0 && j != FIELD_SIZE-1) reveal_point(i-1, j+1);
+    if(i != 0 && j != COLS-1) reveal_point(i-1, j+1);
     // left
     if(j != 0) reveal_point(i, j-1);
     // right
-    if(j != FIELD_SIZE-1) reveal_point(i, j+1);
+    if(j != COLS-1) reveal_point(i, j+1);
     // bottom left
-    if(i != FIELD_SIZE-1 && j != 0) reveal_point(i+1, j-1);
+    if(i != ROWS-1 && j != 0) reveal_point(i+1, j-1);
     // bottom
-    if(i != FIELD_SIZE-1) reveal_point(i+1, j);
+    if(i != ROWS-1) reveal_point(i+1, j);
     // bottom right
-    if(i != FIELD_SIZE-1 && j != FIELD_SIZE-1) reveal_point(i+1, j+1);
+    if(i != ROWS-1 && j != COLS-1) reveal_point(i+1, j+1);
   }
   return hfield[i][j] == '*';
 }
@@ -178,4 +212,16 @@ int mark_mine(int i, int j) {
     return -1;
   vfield[r][c] = '*';
   return 1;
+}
+
+void destroy_vfield() {
+  for(int i=0; i<VFIELD_ROWS;i++)
+    free(vfield[i]);
+  free(vfield);
+}
+
+void destroy_hfield() {
+  for(int i=0; i<ROWS;i++)
+    free(hfield[i]);
+  free(hfield);
 }

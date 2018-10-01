@@ -1,5 +1,7 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "minesweeper.h"
 #include "field.h"
@@ -10,8 +12,8 @@ int get_coordinates(int* row, int* column) {
   printf("Column: ");
   scanf("%d", column);
   
-  if(*row < 1 || *row > FIELD_SIZE ||
-     *column < 1 || *column > FIELD_SIZE)
+  if(*row < 1 || *row > ROWS ||
+     *column < 1 || *column > COLS)
     return 0;
   return 1;
 }
@@ -20,13 +22,13 @@ void play() {
   int mines_left = MINE_COUNT;
   while(1) {
     int row, column;
-    char mode;
+    int mode;
 
     print_board(mines_left);
     printf("Reveal a field (1) or mark a mine (2): ");
-    scanf("%c", &mode);
+    scanf("%d", &mode);
     switch(mode) {
-    case '1': // Reveal point
+    case 1: // Reveal point
       if(!get_coordinates(&row, &column))
 	continue;
       if(reveal_point(row-1, column-1)) {
@@ -35,7 +37,7 @@ void play() {
 	printf("\nYou lost the game\n");
 	return;
       }
-      if(REVEALED_POINTS == (FIELD_SIZE * FIELD_SIZE) - MINE_COUNT) {
+      if(REVEALED_POINTS == ROWS * COLS - MINE_COUNT) {
 	printf("\n");
 	print_vfield();
 	printf("\nYou won the game\n");
@@ -43,7 +45,7 @@ void play() {
       }
       break;
 
-    case '2': // Mark mine
+    case 2: // Mark mine
       if(!get_coordinates(&row, &column))
 	continue;
       int status = mark_mine(row-1, column-1);
@@ -61,17 +63,45 @@ void play() {
 }
 
 
-int main() {
+int main(int argc, char* argv[]) {
+  if(argc == 1) {
+    set_size(ROWS_SMALL, COLS_SMALL, MINES_SMALL);
+  } else if(argc == 2) {
+    if(!strcmp(argv[1], "small")) {
+      set_size(ROWS_SMALL, COLS_SMALL, MINES_SMALL);
+    } else if (!strcmp(argv[1], "medium")) {
+      set_size(ROWS_MEDIUM, COLS_MEDIUM, MINES_MEDIUM);
+    } else if (!strcmp(argv[1], "large")) {
+      set_size(ROWS_LARGE, COLS_LARGE, MINES_LARGE);
+    } else {
+      fprintf(stderr, "Invalid arguments\n");
+      return 1;
+    }
+  }
+  else {
+    fprintf(stderr, "Invalid arguments\n");
+    return 1;
+  }
+  
   int row, column;
-  init_vfield();
+  if(!init_vfield(8)) {
+    fprintf(stderr, "Allocation error\n");
+    return EXIT_FAILURE;
+  }
   do {
     print_board(MINE_COUNT);
     printf("Reveal a field\n");
   } while(!get_coordinates(&row, &column));
-  init_hfield(row-1, column-1);
+  if(!init_hfield(row-1, column-1)) {
+    fprintf(stderr, "Allocation error\n");
+    return EXIT_FAILURE;
+  }
   reveal_point(row-1, column-1);
   play();
-  return 0;
+
+  destroy_hfield();
+  destroy_vfield();
+  return EXIT_SUCCESS;
 }
 
 void print_board(int mines_left) {
