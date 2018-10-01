@@ -5,22 +5,24 @@
 
 int ROWS;
 int COLS;
-int VFIELD_ROWS;
-int VFIELD_COLS;
 int MINE_COUNT;
 
 // Counts how many points have been revealed in the game
 // Used to determine, when the player has won
 int REVEALED_POINTS;
 
-// hidden, used for initialization and lookup
-char** hfield;
+// Counts how many mines have yet to be marked
+int UNMARKED_MINES;
 
-// visible, used for displaying the current game state
-// note that the coordinates go from 1 - FIELD_SIZE
-// however the coordinates need to decreased by one, as
-// hfield has coordinates from 0 - (FIELD_SIZE-1)
-char** vfield;
+// Datastructure for the precomputed playfield
+char** field;
+// Datastructure for the status of each point
+int** status;
+
+#define STATE_UNREVEALED 0
+#define STATE_REVEALED 1
+#define STATE_MARKED 2
+
 
 // Foreground ANSI Color Codes
 #define FG_BLACK "\x1b[30m"
@@ -59,11 +61,8 @@ char** vfield;
 #define BG_BRIGHT_WHITE "\x1b[107m"
 
 void set_size(int rows, int columns, int mine_count);
-int init_vfield();
-void print_vfield();
-int init_hfield();
-void destroy_vfield();
-void destroy_hfield();
+int init_field();
+void destroy_field();
 
 int is_mine(int i, int j);
 int mark_mine(int i, int j);

@@ -24,7 +24,9 @@ void play() {
     int row, column;
     int mode;
 
-    print_board(mines_left);
+    printf("\e[%d;1H\e[%dK", ROWS + 7, 2);
+    printf("\e[%d;1H\e[%dK", ROWS + 8, 2);
+    printf("\e[%d;1H", ROWS + 6);
     printf("Reveal a field (1) or mark a mine (2): ");
     scanf("%d", &mode);
     switch(mode) {
@@ -32,15 +34,15 @@ void play() {
       if(!get_coordinates(&row, &column))
 	continue;
       if(reveal_point(row-1, column-1)) {
-	printf("\n");
-	print_vfield();
-	printf("\nYou lost the game\n");
+	printf("\e[%d;1H\e[2K", ROWS + 6);
+	printf("You lost the game\n");
+	printf("\e[2K\n");
 	return;
       }
       if(REVEALED_POINTS == ROWS * COLS - MINE_COUNT) {
-	printf("\n");
-	print_vfield();
-	printf("\nYou won the game\n");
+        printf("\e[%d;1H\e[2K", ROWS + 6);
+	printf("You won the game\n");
+	printf("\e[2K\n");
 	return;
       }
       break;
@@ -84,28 +86,36 @@ int main(int argc, char* argv[]) {
   }
   
   int row, column;
-  if(!init_vfield(8)) {
-    fprintf(stderr, "Allocation error\n");
-    return EXIT_FAILURE;
-  }
+
   do {
     print_board(MINE_COUNT);
-    printf("Reveal a field\n");
   } while(!get_coordinates(&row, &column));
-  if(!init_hfield(row-1, column-1)) {
+  if(!init_field(row-1, column-1)) {
     fprintf(stderr, "Allocation error\n");
     return EXIT_FAILURE;
   }
   reveal_point(row-1, column-1);
   play();
 
-  destroy_hfield();
-  destroy_vfield();
+  destroy_field();
   return EXIT_SUCCESS;
 }
 
 void print_board(int mines_left) {
   printf("\e[1;1H\e[2J");
-  printf("Mines left: %d\n\n", mines_left);
-  print_vfield();
+  printf("Mines left: %d  \n\n  ", mines_left);
+  for(int i=0; i<2*COLS; i+=2)
+    printf(" %d", ((i/2) + 1) % 10);
+  putchar('\n');
+  for(int i=0; i<2*COLS+2; i++)
+    putchar('_');
+  putchar('\n');
+  for(int i=0; i<ROWS; i++) {
+    printf("%d|", i+1);
+    for(int j=0; j<COLS; j++)
+      printf(" -");
+    putchar('\n');
+  }
+  putchar('\n');
+  printf("Reveal a field\n");
 }
